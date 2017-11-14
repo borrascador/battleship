@@ -8,10 +8,44 @@ class Player {
 }
 
 class Game {
-  constructor() {}
-
-  playGame() {
+  constructor() {
+    this.player1 = new Player("Jan");
+    this.player2 = new Player("Marek");
+    this.order = Math.floor(Math.random() * 2);
     
+    this.testGame();
+  }
+
+  testGame() {
+    for (; this.order<15; this.order++) {
+      if (this.order % 2 === 1) {
+        this.tick(this.player1);
+        this.guess(this.player1, this.player2);
+      } else {
+        this.tick(this.player2);
+        this.guess(this.player2, this.player1);
+      }
+    }
+  }
+  
+  guess(player, opponent) {
+    let myGuessBoard = player.board.guessBoard;
+    let oppPlayerBoard = opponent.board.playerBoard;
+    let myGuess = player.board.getRandomInt(player.board.size*player.board.size);
+    if (oppPlayerBoard[myGuess].value==='SHIP') {
+      myGuessBoard[myGuess].value = 'HIT';
+      oppPlayerBoard[myGuess].value = 'HIT';
+    } else if (oppPlayerBoard[myGuess].value==='NONE') {
+      myGuessBoard[myGuess].value = 'MISS';
+      oppPlayerBoard[myGuess].value = 'MISS';
+    }
+  }
+  
+  tick(player) {
+    player.board.prettyPrint(player.board.playerBoard);
+    console.log('\n');
+    player.board.prettyPrint(player.board.guessBoard);
+    console.log('\n');
   }
 
   // Place ships
@@ -20,7 +54,6 @@ class Game {
   //
   // Take turns calling out coordinates
   // Evaluate hit or miss
-  // 
 }
 
 class Board {
@@ -113,8 +146,12 @@ class Board {
         let index = this.coordToIndex(j, i);
         if (board[index].value==='SHIP') {
           row.push('X');
+        } else if (board[index].value==='HIT') {
+          row.push('@');
+        } else if (board[index].value==='MISS') {
+          row.push('o');
         } else {
-          row.push('O');
+          row.push('.');
         }
       }
       console.log(String(row));
@@ -123,5 +160,4 @@ class Board {
 }
 
 // Test, prints out placed ships on a grid of Xs and Os
-let board = new Board();
-board.prettyPrint(board.playerBoard);
+let game = new Game();
