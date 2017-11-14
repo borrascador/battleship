@@ -141,6 +141,8 @@ class Game {
   // to make a guess with Game.playTurn(x,y), and finally to clear the board
   // with Game.hideBoard(), then to switch places and repeat the process
   // until the game ends.
+  // If a player is unsure whether it is their turn or not, they can call
+  // this.whoseTurn().name to learn the name of the current player.
   // Game.playTurn() may be called either with (x, y) coordinates or without.
   // Leaving coordinates out will generate a random guess.
   // In order to observe a full simulated game, call Game.testFullGame()
@@ -149,11 +151,15 @@ class Game {
     this.player2 = new Player('Bob');
     this.turnCount = Math.floor(Math.random() * 2);
   }
+  
+  whoseTurn() {
+    // Return current player
+    return this.turnCount % 2 === 0 ? this.player1 : this.player2;
+  }
 
   showBoard() {
     // Formats and outputs multiple game boards and pieces of information
-    // Detect current player
-    let player = this.turnCount % 2 === 0 ? this.player1 : this.player2;
+    let player = this.whoseTurn();
     
     console.log('=====================');
     console.log(
@@ -175,7 +181,7 @@ class Game {
     // In the absence of parameters a random guess is made
     if (!this.player1.win && !this.player2.win) {
       if (this.guess(x, y)===0) {
-        console.log("Invalid selection, please guess again")
+        console.log("Invalid selection, please guess again");
         return 0;
       }
       this.turnCount++;
@@ -203,9 +209,7 @@ class Game {
     this.turnCount++;
     this.showBoard();
     console.log(
-      `${this.player1.win
-        ? this.player1.name
-        : this.player2.name} wins! Game over in ${this.turnCount} turns`
+      `${this.whoseTurn().name} wins! Game over in ${this.turnCount} turns`
     );
     this.player1 = new Player('Alice');
     this.player2 = new Player('Bob');
@@ -214,8 +218,8 @@ class Game {
 
   guess(x, y) {
     // Detect current player and opponent
-    let player = this.turnCount % 2 === 0 ? this.player1 : this.player2;
-    let opponent = this.turnCount % 2 === 0 ? this.player2 : this.player1;
+    let player = this.whoseTurn();
+    let opponent = player===this.player1 ? this.player2 : this.player1;
   
     // Set descriptive variable names
     let myGuessBoard = player.board.guessBoard;
