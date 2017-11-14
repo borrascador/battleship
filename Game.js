@@ -1,125 +1,5 @@
-class Game {
-  // API is operated entirely through a single instance of the Game class.
-  // The API holds onto all relevant state data.
-  // Optionally outputs to console for ease of use.
-  //
-  // Instructions:
-  // For two player mode, players may take turns at the console.
-  // The recommended order of play is to first call Game.showBoard(), then
-  // to make a guess with Game.playTurn(x,y), and finally to clear the board
-  // with Game.clearBoard(), then to switch places and repeat the process
-  // until the game ends.
-  // Game.playTurn() may be called either with (x, y) coordinates or without.
-  // Leaving coordinates out will generate a random guess.
-  // In order to observe a full simulated game, call Game.testFullGame()
-  constructor() {
-    this.player1 = new Player('Alice');
-    this.player2 = new Player('Bob');
-    this.turnCount = Math.floor(Math.random() * 2);
-  }
-
-  showBoard() {
-    let player = this.turnCount % 2 === 0 ? this.player1 : this.player2;
-    
-    console.log('\n\n\n\n\n\n\n\n\n\n\n\n');
-    console.log('=====================');
-    console.log(
-      `${player.name}, ${player.board.shipSum - player.score} Left to Lose`
-    );
-    console.log('=====================');
-    console.log('       Guesses       ');
-    player.board.prettyPrint(player.board.guessBoard);
-    console.log('_____________________');
-    console.log('        Ships        ');
-    player.board.prettyPrint(player.board.playerBoard);
-    console.log('_____________________');
-    console.log('\n');
-  }
-
-  playTurn(x, y) {
-    if (!this.player1.win && !this.player2.win) {
-      if (this.guess(x, y)===0) {
-        console.log("Invalid selection, please guess again")
-        return 0;
-      }
-      this.turnCount++;
-    } else {
-      this.reset();
-    }
-  }
-  
-  clearBoard() {
-    console.log('\n\n\n\n\n\n\n\n\n\n\n\n');
-    console.log('\n\n\n\n\n\n\n\n\n\n\n\n');
-    console.log('\n\n\n\n\n\n\n\n\n\n\n\n');
-    console.log('\n\n\n\n\n\n\n\n\n\n\n\n');
-  }
-  
-  testFullGame() {
-    while (!this.player1.win && !this.player2.win) {
-      this.playTurn();
-    }
-    this.reset();
-  }
-  
-  reset() {
-    this.showBoard();
-    this.turnCount++;
-    this.showBoard();
-    console.log(
-      `${this.player1.win
-        ? this.player1.name
-        : this.player2.name} wins! Game over in ${this.turnCount} turns`
-    );
-    this.player1 = new Player('Alice');
-    this.player2 = new Player('Bob');
-    this.turnCount = Math.floor(Math.random() * 2);
-  }
-
-  guess(x, y) {
-    // Detect current player and opponent
-    let player = this.turnCount % 2 === 0 ? this.player1 : this.player2;
-    let opponent = this.turnCount % 2 === 0 ? this.player2 : this.player1;
-  
-    // Set descriptive variable names
-    let myGuessBoard = player.board.guessBoard;
-    let oppPlayerBoard = opponent.board.playerBoard;
-    let size = player.board.size;
-    
-    // Guess control
-    // If entered manually, throw an error for repeat or invalid guesses
-    // If not, generate random valid guess
-    let myGuess = 0;
-    if (arguments.length === 0 || arguments[0] !== undefined) {
-      myGuess = player.board.coordToIndex(x, y);
-      if (
-        myGuessBoard[myGuess].value !== 'NONE' ||
-        myGuess < 0 ||
-        myGuess > size * size - 1
-      ) {
-        return 0;
-      }
-    }
-    else if (arguments.length > 0 || arguments[0] === undefined) {
-      myGuess = player.board.getRandomInt(size * size - 1);
-      while (myGuessBoard[myGuess].value !== 'NONE') {
-        myGuess = player.board.getRandomInt(size * size - 1);
-      }
-    }
-
-    if (oppPlayerBoard[myGuess].value === 'SHIP') {
-      myGuessBoard[myGuess].value = 'HIT';
-      oppPlayerBoard[myGuess].value = 'HIT';
-      player.score++;
-      player.checkWin();
-    } else if (oppPlayerBoard[myGuess].value === 'NONE') {
-      myGuessBoard[myGuess].value = 'MISS';
-      oppPlayerBoard[myGuess].value = 'MISS';
-    }
-  }
-}
-
 class Player {
+  // Full explanation of API can be found in the Game class docstring
   constructor(name) {
     this.name = name;
     // board instance includes a blank board for guessing
@@ -215,7 +95,7 @@ class Board {
       // Only increment once a ship is successfully placed
       i++;
     }
-
+    
     return board;
   }
 
@@ -250,12 +130,141 @@ class Board {
   }
 }
 
-// Test, prints out placed ships on a grid of Xs and Os
-function test1pGame() {
-  let game = new Game();
-  game.testGame();
+class Game {
+  // API is operated entirely through a single instance of the Game class.
+  // The API holds onto all relevant state data.
+  // Optionally outputs to console for ease of use.
+  //
+  // Instructions:
+  // For two player mode, players may take turns at the console.
+  // The recommended order of play is to first call Game.showBoard(), then
+  // to make a guess with Game.playTurn(x,y), and finally to clear the board
+  // with Game.hideBoard(), then to switch places and repeat the process
+  // until the game ends.
+  // Game.playTurn() may be called either with (x, y) coordinates or without.
+  // Leaving coordinates out will generate a random guess.
+  // In order to observe a full simulated game, call Game.testFullGame()
+  constructor() {
+    this.player1 = new Player('Alice');
+    this.player2 = new Player('Bob');
+    this.turnCount = Math.floor(Math.random() * 2);
+  }
+
+  showBoard() {
+    // Formats and outputs multiple game boards and pieces of information
+    // Detect current player
+    let player = this.turnCount % 2 === 0 ? this.player1 : this.player2;
+    
+    console.log('=====================');
+    console.log(
+      `${player.name}, ${player.board.shipSum - player.score} Left to Lose`
+    );
+    console.log('=====================');
+    console.log('       Guesses       ');
+    player.board.prettyPrint(player.board.guessBoard);
+    console.log('_____________________');
+    console.log('        Ships        ');
+    player.board.prettyPrint(player.board.playerBoard);
+    console.log('_____________________');
+    console.log('\n');
+  }
+
+  playTurn(x, y) {
+    // Main interaction between player and game
+    // x and y are optional parameters
+    // In the absence of parameters a random guess is made
+    if (!this.player1.win && !this.player2.win) {
+      if (this.guess(x, y)===0) {
+        console.log("Invalid selection, please guess again")
+        return 0;
+      }
+      this.turnCount++;
+    } else {
+      this.reset();
+    }
+  }
+  
+  hideBoard() {
+    console.clear();
+  }
+  
+  testFullGame() {
+    // Simulates full 2 player game with random guesses and visible boards
+    while (!this.player1.win && !this.player2.win) {
+      this.showBoard();
+      this.playTurn();
+    }
+    this.reset();
+  }
+  
+  reset() {
+    // Shows final positions and who won, then reinitializes Game state
+    this.showBoard();
+    this.turnCount++;
+    this.showBoard();
+    console.log(
+      `${this.player1.win
+        ? this.player1.name
+        : this.player2.name} wins! Game over in ${this.turnCount} turns`
+    );
+    this.player1 = new Player('Alice');
+    this.player2 = new Player('Bob');
+    this.turnCount = Math.floor(Math.random() * 2);
+  }
+
+  guess(x, y) {
+    // Detect current player and opponent
+    let player = this.turnCount % 2 === 0 ? this.player1 : this.player2;
+    let opponent = this.turnCount % 2 === 0 ? this.player2 : this.player1;
+  
+    // Set descriptive variable names
+    let myGuessBoard = player.board.guessBoard;
+    let oppPlayerBoard = opponent.board.playerBoard;
+    let size = player.board.size;
+    
+    // Guess control
+    // If entered manually, throw an error for repeat or invalid guesses
+    // If not, generate random valid guess
+    let myGuess = 0;
+    if (arguments.length === 0 || arguments[0] !== undefined) {
+      myGuess = player.board.coordToIndex(x, y);
+      if (
+        myGuessBoard[myGuess].value !== 'NONE' ||
+        myGuess < 0 ||
+        myGuess > size * size - 1
+      ) {
+        return 0;
+      }
+    }
+    else if (arguments.length > 0 || arguments[0] === undefined) {
+      myGuess = player.board.getRandomInt(size * size - 1);
+      while (myGuessBoard[myGuess].value !== 'NONE') {
+        myGuess = player.board.getRandomInt(size * size - 1);
+      }
+    }
+
+    if (oppPlayerBoard[myGuess].value === 'SHIP') {
+      myGuessBoard[myGuess].value = 'HIT';
+      oppPlayerBoard[myGuess].value = 'HIT';
+      player.score++;
+      player.checkWin();
+    } else if (oppPlayerBoard[myGuess].value === 'NONE') {
+      myGuessBoard[myGuess].value = 'MISS';
+      oppPlayerBoard[myGuess].value = 'MISS';
+    }
+  }
 }
 
+
+
+// Test prints output of a complete random game
+function testGame() {
+  let game = new Game();
+  game.testFullGame();
+}
+
+// Test prints out placed ships on a grid of Xs and Os
+// Along with a HIT (@ symbol) at (0, 0).
 function testBoard() {
   let board = new Board();
   let index = board.coordToIndex(0, 0);
