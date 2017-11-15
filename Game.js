@@ -5,12 +5,12 @@ class Player {
     // board instance includes a blank board for guessing
     // and a pre-filled board with ships legally placed
     this.board = new Board();
-    this.score = 0;
-    this.win = false;
+    this.score = this.board.shipSum;
+    this.loss = false;
   }
 
-  checkWin() {
-    this.win = this.score === this.board.shipSum ? true : false;
+  checkLoss() {
+    this.loss = this.score === 0 ? true : false;
   }
 }
 
@@ -161,7 +161,7 @@ class Game {
 
     console.log('=====================');
     console.log(
-      `${player.name}, ${player.board.shipSum - player.score} Left to Lose`
+      `${player.name}, ${player.score} Left to Lose`
     );
     console.log('=====================');
     console.log('       Guesses       ');
@@ -177,7 +177,7 @@ class Game {
     // Main interaction between player and game
     // x and y are optional parameters
     // In the absence of parameters a random guess is made
-    if (!this.player1.win && !this.player2.win) {
+    if (!this.player1.loss && !this.player2.loss) {
       if (this.guess(x, y) === 0) {
         console.log('Invalid selection, please guess again');
         return 0;
@@ -194,7 +194,7 @@ class Game {
 
   testFullGame() {
     // Simulates full 2 player game with random guesses and visible boards
-    while (!this.player1.win && !this.player2.win) {
+    while (!this.player1.loss && !this.player2.loss) {
       this.showBoard();
       this.playTurn();
     }
@@ -202,10 +202,7 @@ class Game {
   }
 
   reset() {
-    // Shows final positions and who won, then reinitializes Game state
-    this.showBoard();
-    this.turnCount++;
-    this.showBoard();
+    // States who won, then reinitializes Game state
     console.log(
       `${this.whoseTurn().name} wins! Game over in ${this.turnCount} turns`
     );
@@ -247,8 +244,8 @@ class Game {
     if (oppPlayerBoard[myGuess].value === 'SHIP') {
       myGuessBoard[myGuess].value = 'HIT';
       oppPlayerBoard[myGuess].value = 'HIT';
-      opponent.score++;
-      player.checkWin();
+      opponent.score--;
+      player.checkLoss();
     } else if (oppPlayerBoard[myGuess].value === 'NONE') {
       myGuessBoard[myGuess].value = 'MISS';
       oppPlayerBoard[myGuess].value = 'MISS';
