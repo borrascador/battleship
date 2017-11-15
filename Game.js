@@ -182,10 +182,10 @@ class Game {
         console.log('Invalid selection, please guess again');
         return 0;
       }
-      this.turnCount++;
     } else {
       this.reset();
     }
+    this.turnCount++;
   }
 
   hideBoard() {
